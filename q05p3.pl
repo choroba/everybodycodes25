@@ -35,8 +35,8 @@ sub sword_compare {
 
     my $level = 0;
     while ($a->[2][$level]) {
-        my $A = join "", @{ $a->[2][$level] // [""] };
-        my $B = join "", @{ $b->[2][$level] // [""] };
+        my $A = join "", grep defined, @{ $a->[2][$level] };
+        my $B = join "", grep defined, @{ $b->[2][$level] };
         my $cmp_level = $A <=> $B;
         return $cmp_level if $cmp_level;
         ++$level
