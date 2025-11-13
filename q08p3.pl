@@ -15,13 +15,13 @@ my @connect;
 for my $i (1 .. $#nails) {
     my $from = $nails[ $i - 1 ];
     my $to   = $nails[$i];
-    ++$connect[$from]{$to};
-    ++$connect[$to]{$from};
     ($from, $to) = ($to, $from) if $to < $from;
+    ++$connect[$from]{$to};
 
     for my $between ($from + 1 .. $to - 1) {
-        ++$connect[$between]{$_}, ++$connect[$_]{$between}
-            for 1 .. $from - 1, $to + 1 .. SIZE;
+        ++($between < $_ ? $connect[$between]{$_}
+                         : $connect[$_]{$between}
+        ) for 1 .. $from - 1, $to + 1 .. SIZE;
     }
 }
 
