@@ -11,21 +11,21 @@ use constant SIZE => ARGV::OrDATA::is_using_data() ? 8 : 256;
 my @nails = split /,/, <>;
 chomp $nails[-1];
 
-my @connect;
+my @cut;
 for my $i (1 .. $#nails) {
     my $from = $nails[ $i - 1 ];
     my $to   = $nails[$i];
     ($from, $to) = ($to, $from) if $to < $from;
-    ++$connect[$from]{$to};
+    ++$cut[$from][$to];
 
     for my $between ($from + 1 .. $to - 1) {
-        ++($between < $_ ? $connect[$between]{$_}
-                         : $connect[$_]{$between}
+        ++($between < $_ ? $cut[$between][$_]
+                         : $cut[$_][$between]
         ) for 1 .. $from - 1, $to + 1 .. SIZE;
     }
 }
 
-say max(map values %$_, grep defined, @connect);
+say max(grep defined, map @$_, grep defined, @cut);
 
 __DATA__
 1,5,2,6,8,4,1,7,3,6
