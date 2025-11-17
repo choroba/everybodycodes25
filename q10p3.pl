@@ -6,6 +6,15 @@ use feature qw{ say };
 
 use ARGV::OrDATA;
 
+my @DRAGON_MOVES;
+for my $dx (-2, -1, 1, 2) {
+    for my $dy (-2, -1, 1, 2) {
+        next if abs($dx) == abs($dy);
+
+        push @DRAGON_MOVES, [$dx, $dy];
+    }
+}
+
 my ($x, $y);
 my @board;
 my @sheep_start;
@@ -45,36 +54,31 @@ while (keys %agenda) {
                 }
             }
 
-            for my $dx (-2, -1, 1, 2) {
-                for my $dy (-2, -1, 1, 2) {
-                    next if abs($dx) == abs($dy);
+            for my $move (@DRAGON_MOVES) {
+                my $xx = $x + $move->[0];
+                my $yy = $y + $move->[1];
+                next if $xx < 0 || $yy < 0
+                     || $xx > $#{ $board[0] } || $yy > $#board;
 
-                    my $xx = $x + $dx;
-                    my $yy = $y + $dy;
-                    next if $xx < 0 || $yy < 0
-                         || $xx > $#{ $board[0] } || $yy > $#board;
-
-                    my $eaten1 = $#sheep + 1;
-                    if ($board[$yy][$xx] ne '#') {
-                        if ($yy == $j && $xx == $i) {
-                            $eaten1 = $idx;
-                        } else {
-                            my @idx = grep $sheep[$_][0] == $yy
-                                           && $sheep[$_][1] == $xx,
-                                      grep $_ != $idx,
-                                      0 .. $#sheep;
-                            $eaten1 = $idx[0] if @idx;
-                        }
+                my $eaten1 = $#sheep + 1;
+                if ($board[$yy][$xx] ne '#') {
+                    if ($yy == $j && $xx == $i) {
+                        $eaten1 = $idx;
+                    } else {
+                        my @idx = grep $sheep[$_][0] == $yy
+                                       && $sheep[$_][1] == $xx,
+                                  grep $_ != $idx,
+                                  0 .. $#sheep;
+                        $eaten1 = $idx[0] if @idx;
                     }
-                    my @nextsheep;
-                    for my $si (0 .. $#sheep) {
-                        next if $si == $eaten1;
-                        push @nextsheep, $si == $idx ? ($j, $i)
-                                                     : @{ $sheep[$si] };
-                    }
-                    my $ser = pack 'C*', $yy, $xx, @nextsheep;
-                    $next{$ser} += $agenda{$config};
                 }
+                my @nextsheep;
+                for my $si (0 .. $#sheep) {
+                    next if $si == $eaten1;
+                    push @nextsheep, $si == $idx ? ($j, $i)
+                                                 : @{ $sheep[$si] };
+                }
+                $next{ pack 'C*', $yy, $xx, @nextsheep } += $agenda{$config};
             }
         }
     }
